@@ -4,11 +4,14 @@
 
 struct material;
 
+/**
+ * Ray cast hit information
+ */
 struct ray_hit
 {
-	real t = -1.0;
-	vec3 point{};
-	vec3 normal{};
+	real t = -1.0; //The distance along the ray
+	vec3 point{}; //The point in 3D space where the ray hit
+	vec3 normal{}; //The surface normal of the hit
 
-	material* material;
+	material* material; //A pointer to the object's material
 };

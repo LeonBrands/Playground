@@ -5,46 +5,29 @@
 #include "vec3.h"
 #include "random.h"
 
+#include "config.h"
+
 #include "scene.h"
 #include "camera.h"
-#include "sphere.h"
+#include "hittables/sphere.h"
 
 #include "ray.h"
-#include "material.h"
 #include "materials/dielectric.h"
 #include "materials/lambertian.h"
 #include "materials/metal.h"
 
-scene world;
-const unsigned int nbounces = 50;
-
-vec3 color(const ray& r, const hittable* object, const unsigned int depth)
+scene generate_scene()
 {
-	ray_hit hit;
-	if (object->hit(r, 0.0001, std::numeric_limits<real>::max(), hit))
-	{
-		ray scattered;
-		vec3 attenuation;
-
-		if (depth < nbounces && hit.material->scatter(r, hit, attenuation, scattered))
-		{
-			return attenuation * color(scattered, object, depth + 1);
-		}
-		return vec3{};
-	}
-
-	const vec3 unit_direction = r.direction.get_normalized();
-	const real t = 0.5 * (unit_direction.y + 1.0);
-	return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
-}
-
-void generate_scene()
-{
+	auto world = scene{};
+	
+	//"ground" sphere
 	world.objects.push_back(std::make_unique<sphere>(vec3{ 0, -1000, -1 }, 1000, std::make_unique<lambertian>(vec3{ 0.5, 0.5, 0.5 })));
 
-	for (int a = -11; a < 11; a++)
+	const int spawn_range = 11;
+	const real spawn_height = 0.2;
+	for (int a = -spawn_range; a < spawn_range; a++)
 	{
-		for (int b = -11; b < 11; b++)
+		for (int b = -spawn_range; b < spawn_range; b++)
 		{
 			const real choose_mat = rand01();
 			vec3 center{ a + 0.9 * rand01(), 0.2, b + 0.9 * rand01() };
@@ -52,65 +35,59 @@ void generate_scene()
 			{
 				if (choose_mat < 0.6) //difuse
 				{
-					world.objects.push_back(std::make_unique<sphere>(center, 0.2, std::make_unique<lambertian>(vec3(rand01() * rand01(), rand01() * rand01(), rand01() * rand01()))));
+					world.objects.push_back(std::make_unique<sphere>(center, spawn_height, std::make_unique<lambertian>(vec3(rand01() * rand01(), rand01() * rand01(), rand01() * rand01()))));
 				}
 				else if (choose_mat < 0.8) //metal
 				{
-					world.objects.push_back(std::make_unique<sphere>(center, 0.2, std::make_unique<metal>(vec3{ 0.5 * (1 + rand01()), 0.5 * (1 + rand01()), 0.5 * (1 + rand01()) })));
+					world.objects.push_back(std::make_unique<sphere>(center, spawn_height, std::make_unique<metal>(vec3{ 0.5 * (1 + rand01()), 0.5 * (1 + rand01()), 0.5 * (1 + rand01()) })));
 				}
 				else //glass
 				{
-					world.objects.push_back(std::make_unique<sphere>(center, 0.2, std::make_unique<dielectric>(1.5)));
+					world.objects.push_back(std::make_unique<sphere>(center, spawn_height, std::make_unique<dielectric>(1.5)));
 				}
 			}
 		}
 	}
 
+	//A few bigger manual central pieces
 	world.objects.push_back(std::make_unique<sphere>(vec3{ 0, 1, 0 }, 1.0, std::make_unique<dielectric>(1.5)));
 	world.objects.push_back(std::make_unique<sphere>(vec3{ -4, 1, 0 }, 1.0, std::make_unique<lambertian>(vec3{ 0.4, 0.2, 0.1 })));
 	world.objects.push_back(std::make_unique<sphere>(vec3{ 4, 1, 0 }, 1.0, std::make_unique<metal>(vec3{ 0.7, 0.6, 0.5 }, 0.0)));
+
+	return world;
 }
 
 int main(int argc, char** argv)
 {
-	std::cout << "Loading scene\n";
-	generate_scene();
+	scene world = generate_scene();
+	const camera cam{ LOOK_FROM, LOOK_AT, CAM_UP, VFOV, real(NX) / real(NY), APERTURE , DIST_TO_FOCUS };
 
-	std::cout << "Setting up render parameters\n";
-	const int nx = 1920;
-	const int ny = 1080;
-	const int ns = 100;
+	progresscpp::ProgressBar progress{ NY, 70 };
 
-	std::cout << "Creating camera\n";
-	vec3 look_from{ 13, 2, 3 };
-	vec3 look_at{ 0, 0, 0 };
-	real dist_to_focus = 10.0;
-	real aperture = 0.1;
-
-	const camera cam{ look_from, look_at, vec3{ 0, 1, 0 }, 20, real(nx) / real(ny), aperture, dist_to_focus };
-
-	std::cout << "Rendering started\n";
-	progresscpp::ProgressBar progress{ ny, 70 };
-
-	std::ofstream stream{ "test.ppm" };
-	stream << "P3\n" << nx << " " << ny << "\n255\n";
-	for (int y = ny - 1; y >= 0; y--)
+	std::ofstream stream{ "output.ppm" };
+	stream << "P3\n" << NX << " " << NY << "\n255\n";
+	for (int y = NY - 1; y >= 0; y--) //inverse Y
 	{
-		for (int x = 0; x < nx; x++)
+		for (int x = 0; x < NX; x++)
 		{
+			//Calculate the average color across a number (NS) of random samples within the pixel's area
 			vec3 col{};
-
-			for (int s = 0; s < ns; s++)
+			for (int s = 0; s < NS; s++)
 			{
-				real u = real(x + rand01()) / real(nx);
-				real v = real(y + rand01()) / real(ny);
+				//Generate ray with random offset
+				real u = real(x + rand01()) / real(NX);
+				real v = real(y + rand01()) / real(NY);
 
 				ray r = cam.shoot(u, v);
-				col += color(r, &world, 0);
+				col += r.color(&world, 0);
 			}
 
-			col /= ns;
+			//Average
+			col /= NS;
+			//Gamma correction
 			col = vec3(sqrt(col.x), sqrt(col.y), sqrt(col.z));
+
+			//Convert to 256 based integer colors and write to stream
 			col *= 255.99;
 			stream << (int)col.x << " " << (int)col.y << " " << (int)col.z << "\n";
 		}

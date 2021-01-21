@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "real.h"
-#include "vec3.h"
-#include "ray.h"
-#include "material.h"
-#include "hittable.h"
+#include "../real.h"
+#include "../vec3.h"
+#include "../ray.h"
+#include "../material.h"
+#include "../hittable.h"
 
 struct sphere : hittable
 {

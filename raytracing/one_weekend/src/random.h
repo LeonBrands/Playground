@@ -3,6 +3,9 @@
 
 #include "real.h"
 
+/**
+ * Generate a random number between 0 and 1 using the mersenne twister 19937 generator
+ */
 [[nodiscard]] static real rand01()
 {
 	std::random_device rd;

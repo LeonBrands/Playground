@@ -130,11 +130,7 @@ real vec3::squared_length() const
 
 void vec3::normalize()
 {
-	const auto l = length();
-	if (l == 0)
-		return;
-
-	operator/=(l);
+	operator/=(length());
 }
 
 vec3 vec3::get_normalized() const
@@ -149,29 +145,19 @@ vec3 vec3::random_unit()
 	return vec3{ 2 * rand01() - 1, 2 * rand01() - 1, 2 * rand01() - 1 }.get_normalized();
 }
 
-vec3 vec3::random_disk()
-{
-	return vec3{ 2 * rand01() - 1, 2 * rand01() - 1, 0 }.get_normalized();
-}
-
 vec3 vec3::reflect(const vec3& vec, const vec3& normal)
 {
 	return vec - 2 * dot(vec, normal) * normal;
 }
 
-real vec3::dot(const vec3& other) const
-{
-	return x * other.x + y * other.y + z * other.z;
-}
-
 real vec3::dot(const vec3& a, const vec3& b)
 {
-	return a.dot(b);
+	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-vec3 vec3::cross(const vec3& other) const
+vec3 vec3::cross(const vec3& a, const vec3& b)
 {
-	return vec3{ (y * other.z - z * other.y),
-				 (-(x * other.z - z * other.x)),
-				 (x * other.y - y * other.x) };
+	return vec3{ (a.y * b.z - a.z * b.y),
+				 (-(a.x * b.z - a.z * b.x)),
+				 (a.x * b.y - a.y * b.x) };
 }

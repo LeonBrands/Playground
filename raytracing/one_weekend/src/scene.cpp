@@ -5,7 +5,7 @@ bool scene::hit(const ray& r, const real& t_min, const real& t_max, ray_hit& hit
 	ray_hit temp;
 	bool result = false;
 
-	real closest = t_max;
+	real closest = t_max; //Keep track of the closest hit, rays stop there
 	for (const auto& object : objects)
 	{
 		if (object->hit(r, t_min, closest, temp))
