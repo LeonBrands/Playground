@@ -2,7 +2,7 @@
 A collection of side projects and test environments that I've created.
 
 ## Table of Contents
-+  [Ray Tracing in One Weekend] (#ray-tracing)
++  [Ray Tracing in One Weekend](#ray-tracing)
 
 ## Content
 
