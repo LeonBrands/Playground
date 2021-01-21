@@ -38,6 +38,9 @@ bool sphere::hit(const ray& r, const real& t_min, const real& t_max, ray_hit& hi
 		return false;
 	}
 
+	//The quadratic equation has 2 possible points that it can resolve
+	//Since t_min and t_max might invalidate either, it's important to check both
+	
 	real temp = (-b - sqrt(b * b - a * c)) / a;
 	if (temp < t_max && temp > t_min)
 	{

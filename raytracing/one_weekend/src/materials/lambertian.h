@@ -1,6 +1,9 @@
 #pragma once
 #include "../material.h"
 
+/**
+ * @brief A standard diffuse material, scatters rays outwards based on the normal with a random direction creating an always rough material
+*/
 struct lambertian : material
 {
 	explicit lambertian(const vec3& pAlbedo);

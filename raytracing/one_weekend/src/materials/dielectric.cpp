@@ -9,15 +9,13 @@ dielectric::dielectric(const real& pRefraction) : refraction_idx(pRefraction)
 
 bool dielectric::scatter(const ray& ray_in, const ray_hit& hit, vec3& attenuation, ray& scattered) const
 {
-	vec3 outward_normal;
-	const vec3 reflected = vec3::reflect(ray_in.direction, hit.normal);
-
-	real ni_over_nt;
+	//The material makes no special changes to the ray's color
 	attenuation = vec3(1, 1, 1);
-	vec3 refracted;
-	real reflect_probability;
+
+	//Calculate the incoming direction and outgoing normal
+	vec3 outward_normal;
+	real ni_over_nt;
 	real cosine;
-	
 	if (vec3::dot(ray_in.direction, hit.normal) > 0)
 	{
 		outward_normal = -hit.normal;
@@ -32,9 +30,11 @@ bool dielectric::scatter(const ray& ray_in, const ray_hit& hit, vec3& attenuatio
 	}
 
 	//Calculate reflection probability upon refract
+	vec3 refracted;
+	real reflect_probability;
 	if (refract(ray_in.direction, outward_normal, ni_over_nt, refracted))
 	{
-		reflect_probability = schlick(cosine, refraction_idx);
+		reflect_probability = schlick(cosine);
 	}
 	else //Perfect reflection
 	{
@@ -44,6 +44,7 @@ bool dielectric::scatter(const ray& ray_in, const ray_hit& hit, vec3& attenuatio
 	//Calculate a random (increasing depending on the value calculated by schlick) chance that the ray gets reflected 
 	if (rand01() < reflect_probability)
 	{
+		const vec3 reflected = vec3::reflect(ray_in.direction, hit.normal);
 		scattered = ray(hit.point, reflected);
 	}
 	else
@@ -54,7 +55,7 @@ bool dielectric::scatter(const ray& ray_in, const ray_hit& hit, vec3& attenuatio
 	return true;
 }
 
-bool dielectric::refract(const vec3& v, const vec3& n, const real& ni_over_nt, vec3& refracted)
+bool dielectric::refract(const vec3& v, const vec3& n, const real& ni_over_nt, vec3& refracted) const
 {
 	//Refraction as described by Snel's law:
 	//n sin(theta) = n' sin(theta')
@@ -74,7 +75,7 @@ bool dielectric::refract(const vec3& v, const vec3& n, const real& ni_over_nt, v
 	return false;
 }
 
-real dielectric::schlick(const real& cosine, const real& refraction_idx)
+real dielectric::schlick(const real& cosine) const
 {
 	//Polynomial approximation by Christophine Schlick
 	real r0 = (1 - refraction_idx) / (1 + refraction_idx);

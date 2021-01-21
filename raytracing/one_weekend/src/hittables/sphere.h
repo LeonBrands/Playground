@@ -5,6 +5,9 @@
 #include "../material.h"
 #include "../hittable.h"
 
+/**
+ * @brief A simple spherical raycast hittable object defined by a center and a radius.
+*/
 struct sphere : hittable
 {
 	sphere() = default;

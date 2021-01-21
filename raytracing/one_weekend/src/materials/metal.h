@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "../material.h"
 
+/**
+ * @brief A metal-like material with strong reflections that can be modified to make the metal look "rough" through the fuzz parameter.
+*/
 struct metal : material
 {
 	explicit metal(const vec3& pAlbedo, const real& pFuzz = 1);
