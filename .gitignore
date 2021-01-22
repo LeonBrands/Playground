@@ -6,6 +6,7 @@
 [Rr]elease[Dd]ebug/
 [Rr]elease[Ww]ith[Dd]ebug[Ii]nfo/
 [Ll]og/
+[Bb]in/
 .idea/
 cmake-build-debug/
 

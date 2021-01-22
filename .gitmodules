@@ -1,0 +1,6 @@
+[submodule "thirdParty/glfw"]
+	path = thirdParty/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "thirdParty/progress-cpp"]
+	path = thirdParty/progress-cpp
+	url = https://github.com/prakhar1989/progress-cpp.git
