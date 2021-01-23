@@ -1,7 +1,7 @@
 #pragma once
 
 //Number of bounces before a ray stops recursively casting
-#define NBOUNCES 50
+#define NBOUNCES 250
 
 //Number of horizontal pixels in the generated image
 #define NX 1920
@@ -9,7 +9,7 @@
 #define NY 1080
 
 //Number of samples per pixel
-#define NS 100
+#define NS 250
 
 //Camera's position in the world
 #define LOOK_FROM vec3{ 13, 2, 3 }
@@ -23,3 +23,6 @@
 #define APERTURE 0.1
 //The camera's (vertical) field of view
 #define VFOV 20
+
+//A multiplier for the ambient sky colors
+#define AMBIENT vec3 { 200/256, 1/256.0, 5/256.0 }

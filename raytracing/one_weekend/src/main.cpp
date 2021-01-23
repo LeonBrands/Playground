@@ -13,6 +13,7 @@
 
 #include "ray.h"
 #include "materials/dielectric.h"
+#include "materials/emissive.h"
 #include "materials/lambertian.h"
 #include "materials/metal.h"
 
@@ -24,7 +25,7 @@ scene generate_scene()
 	world.objects.push_back(std::make_unique<sphere>(vec3{ 0, -1000, -1 }, 1000, std::make_unique<lambertian>(vec3{ 0.5, 0.5, 0.5 })));
 
 	const int spawn_range = 11;
-	const real spawn_height = 0.2;
+	const real spawn_radius = 0.2;
 	for (int a = -spawn_range; a < spawn_range; a++)
 	{
 		for (int b = -spawn_range; b < spawn_range; b++)
@@ -35,15 +36,19 @@ scene generate_scene()
 			{
 				if (choose_mat < 0.6) //difuse
 				{
-					world.objects.push_back(std::make_unique<sphere>(center, spawn_height, std::make_unique<lambertian>(vec3(rand01() * rand01(), rand01() * rand01(), rand01() * rand01()))));
+					world.objects.push_back(std::make_unique<sphere>(center, spawn_radius, std::make_unique<lambertian>(vec3(rand01() * rand01(), rand01() * rand01(), rand01() * rand01()))));
 				}
 				else if (choose_mat < 0.8) //metal
 				{
-					world.objects.push_back(std::make_unique<sphere>(center, spawn_height, std::make_unique<metal>(vec3{ 0.5 * (1 + rand01()), 0.5 * (1 + rand01()), 0.5 * (1 + rand01()) })));
+					world.objects.push_back(std::make_unique<sphere>(center, spawn_radius, std::make_unique<metal>(vec3{ 0.5 * (1 + rand01()), 0.5 * (1 + rand01()), 0.5 * (1 + rand01()) })));
+				}
+				else if (choose_mat < 0.9)
+				{
+					world.objects.push_back(std::make_unique<sphere>(center + vec3(0, 0.3, 0), 0.2, std::make_unique<emissive>(vec3{ 1, 1, 1 }, 5)));
 				}
 				else //glass
 				{
-					world.objects.push_back(std::make_unique<sphere>(center, spawn_height, std::make_unique<dielectric>(1.5)));
+					world.objects.push_back(std::make_unique<sphere>(center, spawn_radius, std::make_unique<dielectric>(1.5)));
 				}
 			}
 		}

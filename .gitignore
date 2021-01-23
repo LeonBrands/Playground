@@ -89,3 +89,4 @@ Tristeon.dir
 *.lastcodeanalysissucceeded
 *.autosave
 enc_temp_folder
+raytracing/one_weekend/output.ppm
